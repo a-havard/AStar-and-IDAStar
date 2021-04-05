@@ -1,0 +1,246 @@
+<html>
+  <head>
+    <title>Pathfinding</title>
+    <style>
+html {
+  transform: rotateY(20deg);
+}
+
+table {
+  width: 100%;
+  height: calc(100% - 30px);
+}
+
+td {
+  border: 1px solid black;
+}
+
+td.start {
+  background: #0099FF;
+}
+
+td.end {
+  background: #FF9900;
+}
+
+td.open {
+  background: #00FF00;
+}
+
+td.closed {
+  background: #FF0000;
+}
+
+td.obstacle {
+  background: black;
+}
+
+td.path {
+  background: blue;
+}
+    </style>
+  </head>
+  <body onload="init();">
+    <script src="IDAStarPathNode.js"></script>
+    <script src="IDAStarPathBoard.js"></script>
+    <script>
+var BOARD;
+var GRIDS;
+
+function init() {
+  GRIDS = [];
+
+  var testGridLarge = [
+    "          ",
+    " x  xxxxe ",
+    " xx    xxx",
+    "  xxxxxx  ",
+    "       x  ",
+    "xxxx   xx ",
+    "        x ",
+    "          ",
+    "   xxxxxxx",
+    "         s",
+  ];
+  GRIDS.push(testGridLarge);
+
+  var testGridSmall = [
+    "  e",
+    "   ",
+    "s  "
+  ];
+  GRIDS.push(testGridSmall);
+
+  GRIDS.push([
+    "         e     ",
+    "  x     xxx    ",
+    "  xxxxxxx x    ",
+    "    x     xxxx ",
+    "    x     x    ",
+    "          x    ",
+    "        xxx xxx",
+    "xxxxx     x    ",
+    "          x    ",
+    "          xxx  ",
+    "  xx           ",
+    "  xxxxx        ",
+    "               ",
+    "  xxx          ",
+    "   s           "
+  ]);
+
+  GRIDS.push([
+    "     x   e     ",
+    "  x     xxx    ",
+    "  xxxxxxx x    ",
+    "    x     xxxx ",
+    "    x     x    ",
+    "          x    ",
+    "        xxx xxx",
+    "xxxxx     x    ",
+    "          x    ",
+    "          xxx  ",
+    "  xx           ",
+    "  xxxxx        ",
+    "               ",
+    "  xxx          ",
+    "   s           "
+  ]);
+
+  GRIDS.push([
+    "          ",
+    "     xxx  ",
+    "   x x x  ",
+    "   x x x  ",
+    "     s x  ",
+    "  x    x  ",
+    " xxxxx x  ",
+    " x  x  x  ",
+    " xe xxxx  ",
+    " xx       "
+  ]);
+
+  GRIDS.push([
+    "s           x  ",
+    " xx   x xx xx x",
+    " x    x   xx   ",
+    " x  xxx xxx xx ",
+    "     x    x x  ",
+    "xxxx xx   x xx ",
+    "      xxx x x  ",
+    "        x   x x",
+    "xxxxxxx xx  x  ",
+    "         xx x  ",
+    "   x   x  xxx  ",
+    "  xxxxxx    x  ",
+    "     x xxxxxx  ",
+    "  xx x  x x xx ",
+    "         x x  e"
+  ]);
+
+  GRIDS.push([
+    "         ",
+    " xx      ",
+    "sxx   xxe",
+    "      xx ",
+    "         "
+  ]);
+
+  GRIDS.push([
+    "       x                 ",
+    "   x   x   x    x        ",
+    "   x       x    x  s     ",
+    "   x  xxxxxxx   xx    xx ",
+    "  xxxxx          xxxxxx  ",
+    "  x      xx xxxx         ",
+    "  x   xxxxx    xx xxxxxx ",
+    "  xx   xx xx    x   x    ",
+    "   xxxxx     xx x   x  xx",
+    " xxx  xxxxx xxxxxx xx    ",
+    " x xe x       x  x xxx   ",
+    " x x  x  xxx     x   x   ",
+    " x x xx  xxxxxx xxxx x   ",
+    " x x  xxxx               ",
+    "                         ",
+  ]);
+
+  GRIDS.push([
+    "      xx        ",
+    "  s   xx   xx   ",
+    "           xx   ",
+    "   xx           ",
+    "  xxxx      xx  ",
+    "  xxxx     xxxx ",
+    "   xx      xxxx ",
+    "x           xx e",
+    "       x        "
+  ]);
+
+  var select = document.getElementById("map");
+  for (var i=0; i<GRIDS.length; i++) {
+    var option = document.createElement("option");
+    option.text = "Map " + (i+1);
+    option.value = "" + i;
+    select.add(option);
+  }
+}
+
+function initBoard() {
+  var gridIndex = JSON.parse(document.getElementById("map").value);
+  var grid = GRIDS[gridIndex];
+  BOARD = new PathBoard(grid);
+  initShowBoard(grid);
+}
+
+function initShowBoard(grid) {
+  var table = document.getElementById("boardDisplay");
+  table.innerHTML = "";
+  for (var y=0; y<grid.length; y++) {
+    var row = table.insertRow();
+    for (var x=0; x<grid[y].length; x++) {
+      var cell = row.insertCell();
+      cell.id = "x" + x + "y" + y;
+      if (grid[y][x] == "x") cell.className = "obstacle";
+      else if (grid[y][x] == "s") cell.className = "start";
+      else if (grid[y][x] == "e") cell.className = "end";
+    }
+  }
+}
+
+function showBoard() {
+  for (var y=0; y<BOARD.grid.length; y++) {
+    for (var x=0; x<BOARD.grid[0].length; x++) {
+      var cell = document.getElementById("x" + x + "y" + y);
+      if (cell.className === "path") {
+        cell.className = "";
+      }
+    }
+  }
+  for (var i=0; i<BOARD.path.length; i++) {
+    var pos = BOARD.path[i].position;
+    var cell = document.getElementById("x" + pos.x + "y" + pos.y);
+    var data = BOARD.grid[pos.y][pos.x];
+    if (data.hCost == 0 || data.hCost == Infinity) continue; // Start or End
+    cell.className = "path";
+    // cell.innerHTML = data.gCost + " " + data.hCost + "<br>" + data.fCost;
+  }
+}
+
+function run() {
+  var done = BOARD.runTurn();
+  showBoard();
+  if (!done) {
+    // Slowly get faster over time
+    var delay = Math.round(100*Math.pow(BOARD.loopsRun, -1.12));
+    // console.log("Delay at " + BOARD.loopsRun + ": " + delay);
+    window.setTimeout(run, delay);
+  }
+}
+    </script>
+    <table id="boardDisplay"></table>
+    <button onclick="run();">Find Path</button><br>
+    <select id="map">
+    </select>
+    <button onclick="initBoard();">Load Map</button>
+  </body>
+</html>
