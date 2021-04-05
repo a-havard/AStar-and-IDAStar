@@ -12,7 +12,7 @@ function PathNode(position, obstacle) {
 
 PathNode.prototype.setCost = function(gCost, endPosition) {
   this.gCost = gCost;
-  if (this.hCost === Infinity) {
+  if (this.hCost !== 0) {
     var diffX = Math.abs(this.position.x - endPosition.x);
     var diffY = Math.abs(this.position.y - endPosition.y);
     this.hCost = diffX > diffY ? 14 * diffY + 10 * (diffX - diffY) : 14 * diffX + 10 * (diffY - diffX);

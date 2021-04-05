@@ -220,7 +220,7 @@ function showBoard() {
     var pos = BOARD.path[i].position;
     var cell = document.getElementById("x" + pos.x + "y" + pos.y);
     var data = BOARD.grid[pos.y][pos.x];
-    if (data.hCost == 0 || data.hCost == Infinity) continue; // Start or End
+    if ((pos.x === BOARD.startPosition.x && pos.y === BOARD.startPosition.y) || (pos.x === BOARD.endPosition.x && pos.y === BOARD.endPosition.y)) continue; // Start or End
     cell.className = "path";
     // cell.innerHTML = data.gCost + " " + data.hCost + "<br>" + data.fCost;
   }

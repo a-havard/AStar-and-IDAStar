@@ -60,9 +60,7 @@ PathBoard.prototype.runTurn = function() {
     this.bound = diffX > diffY ? 14 * diffY + 10 * (diffX - diffY) : 14 * diffX + 10 * (diffY - diffX);
 
     this.initializePath();
-
     this.grid[this.startPosition.y][this.startPosition.x].hCost = Infinity;
-    this.grid[this.endPosition.y][this.endPosition.x].hCost = 0;
   }
 
   if (this.nodesToCheck[this.nodesToCheck.length-1].length === 0) {
@@ -99,8 +97,6 @@ PathBoard.prototype.runTurn = function() {
       } else if (newNode.fCost > this.bound) {
         // New node is outside the previously set bound
         if (newNode.fCost < this.min) this.min = newNode.fCost;
-        this.nodesToCheck.pop();
-        this.path.pop();
 
         if (this.path.length === 0) {
           console.log(`No path found for bound of ${this.bound}!`);
@@ -128,4 +124,6 @@ PathBoard.prototype.runTurn = function() {
 PathBoard.prototype.initializePath = function() {
   this.path.push(this.grid[this.startPosition.y][this.startPosition.x]);
   this.nodesToCheck.push(this.grid[this.startPosition.y][this.startPosition.x].genNodesToCheck(this.endPosition, this.grid));
+  this.grid[this.startPosition.y][this.startPosition.x].gCost = 0;
+  this.grid[this.endPosition.y][this.endPosition.x].hCost = 0;
 }
