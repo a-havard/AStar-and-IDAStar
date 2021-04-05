@@ -228,8 +228,8 @@ function showBoard() {
 
 function run() {
   var done = BOARD.runTurn();
-  showBoard();
   if (!done) {
+    showBoard();
     // Slowly get faster over time
     var delay = Math.round(100*Math.pow(BOARD.loopsRun, -1.12));
     // console.log("Delay at " + BOARD.loopsRun + ": " + delay);

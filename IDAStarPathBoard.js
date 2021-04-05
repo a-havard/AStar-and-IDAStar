@@ -49,7 +49,7 @@ PathBoard.prototype.getGridFromStringArray = function(grid) {
 }
 
 PathBoard.prototype.runTurn = function() {
-  if (this.finished) return;
+  if (this.finished) return true;
 
   this.loopsRun++;
 
@@ -79,7 +79,6 @@ PathBoard.prototype.runTurn = function() {
         this.finished = true;
         console.log("Could not find a path!");
       }
-      return;
     }
   } else {
     let newNode;
@@ -96,7 +95,7 @@ PathBoard.prototype.runTurn = function() {
         // We found the optimal path
         console.log("Path found!");
         this.finished = true;
-        return;
+        return true;
       } else if (newNode.fCost > this.bound) {
         // New node is outside the previously set bound
         if (newNode.fCost < this.min) this.min = newNode.fCost;
@@ -112,7 +111,6 @@ PathBoard.prototype.runTurn = function() {
             this.finished = true;
             console.log("Could not find a path!");
           }
-          return;
         }
       } else {
         // New node is valid
